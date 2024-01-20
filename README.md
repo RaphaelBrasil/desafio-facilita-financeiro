@@ -35,7 +35,7 @@ Para encerrar os serviços, pressione Ctrl + C no terminal onde o docker-compose
 Ou
 
 ```bash
-docker-compose down
+docker-compose dawn
 ```
 
 ### Observações Importantes
