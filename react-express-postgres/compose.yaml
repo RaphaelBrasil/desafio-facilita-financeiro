@@ -1,0 +1,66 @@
+services:
+    backend:
+        build:
+            args:
+                - NODE_ENV=development
+            context: backend
+            target: development
+        command: npm run start-watch
+        environment:
+            - DATABASE_DB=example
+            - DATABASE_USER=root
+            - DATABASE_PASSWORD=/run/secrets/db-password
+            - DATABASE_HOST=db
+            - NODE_ENV=development
+        ports:
+            - 8080:8080
+        secrets:
+            - db-password
+        volumes:
+            - ./backend/src:/code/src:ro
+            - ./backend/package.json:/code/package.json
+            - ./backend/package-lock.json:/code/package-lock.json
+            - back-notused:/opt/app/node_modules
+        networks:
+            - public
+            - private
+        depends_on:
+            - db
+
+    db:
+        image: postgres:14.1-alpine
+        restart: always
+        environment:
+            - POSTGRES_USER=root
+            - POSTGRES_PASSWORD=root
+            - POSTGRES_DB=root
+        ports:
+            - 5432:5432
+        volumes:
+            - ./db/database-seed.sql:/docker-entrypoint-initdb.d/database-seed.sql
+        networks:
+            - private
+
+    frontend:
+        build:
+            context: frontend
+            target: development
+        ports:
+            - 3000:3000
+        volumes:
+            - ./frontend/src:/code/src
+            - /code/node_modules
+        networks:
+            - public
+        depends_on:
+            - backend
+
+networks:
+    public:
+    private:
+volumes:
+    back-notused:
+    db-data:
+secrets:
+    db-password:
+        file: db/password.txt
